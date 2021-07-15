@@ -3,7 +3,8 @@ from pathlib import Path
 
 class Config:
     def __init__(self, configPath):
-        config = configparser.ConfigParser()
+        self._config = configparser.ConfigParser()
+        config = self._config
         config.read_file(open(configPath))
         if not config.has_section("LOCAL"):
             raise Exception("config file does not have 'LOCAL' section")
@@ -13,8 +14,7 @@ class Config:
         else:
             raise Exception("'Paths' is empty in LOCAL 'section'")
         excludePaths = config.get("LOCAL", "ExcludePaths", fallback="")
-        if excludePaths:
-            excludePathsList = [Path(path) for path in excludePaths.split(";")]
+        excludePathsList = [Path(path) for path in excludePaths.split(";")]
         self._pathsList = pathsList
         self._excludePathsList = excludePathsList
 
