@@ -12,3 +12,6 @@ Steps
 
 Read a config file
 List files (or paths)
+
+Copy files
+Compare original and destination files (checksum)

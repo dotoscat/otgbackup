@@ -1,5 +1,6 @@
 import configparser
 from pathlib import Path
+from .endpoint import Endpoint
 
 class Config:
     def __init__(self, configPath):
@@ -30,6 +31,23 @@ class Config:
                 nFiles += 1
                 size += aFile.stat().st_size
         return nFiles, size
+
+    def GetEndpoints(self):
+        # return self._config.sections()
+        endpoints = []
+        for section in self._config.sections():
+            if section == "LOCAL":
+                continue
+            path = self._config.get(section, "Path", fallback="")
+            if not path:
+                continue
+            endpoint = Endpoint(self, section, path)
+            endpoints.append(endpoint)
+        return endpoints
+
+    def GetEndpoint(self, section):
+        path = self._config.get(section, "Path", fallback="")
+        return Endpoint(self, section, path)
 
 def _walker(path, excludePathList):
     if not path.exists():
