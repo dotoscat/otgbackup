@@ -13,7 +13,9 @@ def main():
             print("progress", i, totalFiles)
         def end():
             print("End!!")
-        usb.Full(progress, end)
+        result = usb.Full(progress, end)
+        for error in result.IterErrors():
+            print(error, error[2])
     # print(str(config.GetEndpoints()[0]))
 
 if __name__ == "__main__":
