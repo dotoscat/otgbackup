@@ -2,6 +2,11 @@ from pathlib import Path
 from enum import Enum, auto
 from shutil import copy2
 from sys import exc_info
+from typing import Generator, Callable, Optional, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from . import config
+    import pathlib
 
 class _Kind(Enum):
     DONE = auto()
@@ -9,49 +14,60 @@ class _Kind(Enum):
     DESTINATION_NO_EXISTS = auto()
 
 class Result:
-    def __init__(self, kind):
-        self._errors = []
+    _errors: list[tuple[str, Type[Exception], Exception]] = []
+    _kind: _Kind
+
+    def __init__(self, kind: _Kind) -> None:
+        # self._errors = []
         self._kind = kind
 
-    def HasErrors(self):
+    def HasErrors(self) -> bool:
         return True if self._errors else False
 
-    def AddError(self, path, _type, value):
+    def AddError(self, path: str, _type: Type[Exception], value: Exception) -> None:
         self._errors.append((path, _type, value))
 
-    def IterErrors(self):
+    def IterErrors(self) -> Generator[tuple[str, Type[Exception], Exception], None, None]:
         yield from self._errors
 
-    def IsDone(self):
+    def IsDone(self) -> bool:
         return self._kind == _Kind.DONE
 
-    def IsNotValid(self):
+    def IsNotValid(self) -> bool:
         return self._kind == _Kind.NO_VALID
 
+    def DestinationNoExists(self) -> bool:
+        return self._kind == _Kind.DESTINATION_NO_EXISTS
+
 class Endpoint:
-    def __init__(self, config, name, path):
+    _config: 'config.Config'
+    _name: str
+    _path: str
+
+    def __init__(self, config: 'config.Config', name: str, path: str) -> None:
         self._config = config
         self._name = name
         self._path = path
 
     @property
-    def Name(self):
+    def Name(self) -> str:
         return self._name
 
     @property
-    def Path(self):
+    def Path(self) -> str:
         return self._path
 
-    def IsValid(self):
+    def IsValid(self) -> bool:
         return self._path != ""
 
-    def __str__(self):
-        return "% - %".format(self._name, self._path)
+    def __str__(self) -> str:
+        return "%{0} - %{1}".format(self._name, self._path)
 
-    def Full(self, progress, end=None):
+    def Full(self,
+        progress: Callable[['pathlib.Path', int, int], None],
+        end: Optional[Callable[[], None]] = None) -> Result:
         """
-            progress(currentFile, i, totalFiles)
-            end()
+            Something
         """
         if not self.IsValid():
             return Result(_Kind.NO_VALID)

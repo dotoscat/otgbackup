@@ -1,9 +1,10 @@
 import configparser
 from pathlib import Path
+from typing import Generator
 from .endpoint import Endpoint
 
 class Config:
-    def __init__(self, configPath):
+    def __init__(self, configPath: str):
         self._config = configparser.ConfigParser()
         config = self._config
         config.read_file(open(configPath))
@@ -19,11 +20,11 @@ class Config:
         self._pathsList = pathsList
         self._excludePathsList = excludePathsList
 
-    def IterFiles(self):
+    def IterFiles(self) -> Generator[Path, None, None]:
         for path in self._pathsList:
             yield from _walker(path, self._excludePathsList)
 
-    def GetTotalFilesAndSize(self):
+    def GetTotalFilesAndSize(self) -> tuple[int, int]:
         nFiles = 0
         size = 0
         for path in self._pathsList:
@@ -32,7 +33,7 @@ class Config:
                 size += aFile.stat().st_size
         return nFiles, size
 
-    def GetEndpoints(self):
+    def GetEndpoints(self) -> list[Endpoint]:
         # return self._config.sections()
         endpoints = []
         for section in self._config.sections():
@@ -45,11 +46,11 @@ class Config:
             endpoints.append(endpoint)
         return endpoints
 
-    def GetEndpoint(self, section):
+    def GetEndpoint(self, section: str) -> Endpoint:
         path = self._config.get(section, "Path", fallback="")
         return Endpoint(self, section, path)
 
-def _walker(path, excludePathList):
+def _walker(path: Path, excludePathList: list[Path]) -> Generator[Path, None, None]:
     if not path.exists():
         return
     for aPath in path.iterdir():

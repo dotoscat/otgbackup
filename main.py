@@ -1,6 +1,10 @@
+from typing import TYPE_CHECKING
 import gatodeseguridad
 
-def main():
+if TYPE_CHECKING:
+    from pathlib import Path
+
+def main() -> None:
     print("gatodeseguridad")
     config = gatodeseguridad.config.Config("config.ini")
     # for path in config.IterFiles():
@@ -9,9 +13,9 @@ def main():
     #print(total, size)
     usb = config.GetEndpoint("USB")
     if usb.IsValid():
-        def progress(file, i, totalFiles):
+        def progress(file: Path, i: int , totalFiles: int) -> None:
             print("progress", i, totalFiles)
-        def end():
+        def end() -> None:
             print("End!!")
         result = usb.Full(progress, end)
         for error in result.IterErrors():
