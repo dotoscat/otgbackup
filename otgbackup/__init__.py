@@ -12,4 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+    This is a straightforward to use module.
+
+    Usually you start with an instance of Config passing to it a path string.
+    Later you retrieve from this instance the endpoints, which are objects, and then
+    you operate with these endpoints making full backups, integrity checks... whatever is defined.
+"""
+
 from . import config
