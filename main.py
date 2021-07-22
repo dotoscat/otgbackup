@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 def main() -> None:
     print("gatodeseguridad")
-    config = gatodeseguridad.config.Config("config.ini")
+    config = otgbackup.config.Config("config.ini")
     # for path in config.IterFiles():
     #    print(path, type(path))
     #total, size = config.GetTotalFilesAndSize()
