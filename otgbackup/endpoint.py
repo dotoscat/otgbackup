@@ -23,11 +23,17 @@ if TYPE_CHECKING:
     import pathlib
 
 class _Kind(Enum):
+    """
+        _Kind defines the kind of Result.
+    """
     DONE = auto()
     NO_VALID = auto()
     DESTINATION_NO_EXISTS = auto()
 
 class Result:
+    """
+        Result tells a result of an Endpoint operation.
+    """
     _errors: list[tuple[str, Type[Exception], Exception]] = []
     _kind: _Kind
 
@@ -54,6 +60,9 @@ class Result:
         return self._kind == _Kind.DESTINATION_NO_EXISTS
 
 class Endpoint:
+    """
+        Endpoint operates over an endpoint defined in the config.
+    """
     _config: 'config.Config'
     _name: str
     _path: str
@@ -65,24 +74,36 @@ class Endpoint:
 
     @property
     def Name(self) -> str:
+        """
+            This is the same as the name of the section in the config file.
+        """
         return self._name
 
     @property
     def Path(self) -> str:
+        """
+            Path of the backup destination.
+        """
         return self._path
 
     def IsValid(self) -> bool:
+        """
+            IsValid tells if this endpoint is valid to operate with.
+            Any operation done with a no valid endpoint returns a NO_VALID Result.
+        """
         return self._path != ""
 
     def __str__(self) -> str:
+        """
+            String representation of this Endpoint.
+        """
         return "%{0} - %{1}".format(self._name, self._path)
 
-    def Full(self,
+    def FullBackupOperation(self,
         progress: Callable[['pathlib.Path', int, int], None],
         end: Optional[Callable[[], None]] = None) -> Result:
-        """
-            Something
-        """
+            """
+            """
         if not self.IsValid():
             return Result(_Kind.NO_VALID)
         path = Path(self._path).joinpath("full")

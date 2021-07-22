@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-
-"""
-
 import configparser
 from pathlib import Path
 from typing import Generator
 from .endpoint import Endpoint
 
 class Config:
+    """
+        This is the entry point class for this module.
+    """
     def __init__(self, configPath: str):
         self._config = configparser.ConfigParser()
         config = self._config
@@ -39,10 +38,16 @@ class Config:
         self._excludePathsList = excludePathsList
 
     def IterFiles(self) -> Generator[Path, None, None]:
+        """
+            Iter through the files excluding files and folders defined in config.
+        """
         for path in self._pathsList:
             yield from _walker(path, self._excludePathsList)
 
     def GetTotalFilesAndSize(self) -> tuple[int, int]:
+        """
+            Get the total files and the total size, in bytes, from the paths defined.
+        """
         nFiles = 0
         size = 0
         for path in self._pathsList:
@@ -65,10 +70,16 @@ class Config:
         return endpoints
 
     def GetEndpoint(self, section: str) -> Endpoint:
+        """
+            section is a name given to an endpoint in the config file
+        """
         path = self._config.get(section, "Path", fallback="")
         return Endpoint(self, section, path)
 
 def _walker(path: Path, excludePathList: list[Path]) -> Generator[Path, None, None]:
+    """
+        _walker is a helper function to iterate through the files and folders
+    """
     if not path.exists():
         return
     for aPath in path.iterdir():
