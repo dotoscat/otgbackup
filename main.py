@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from typing import TYPE_CHECKING
-import gatodeseguridad
+import otgbackup
 
 if TYPE_CHECKING:
     from pathlib import Path
