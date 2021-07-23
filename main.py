@@ -27,11 +27,11 @@ def main() -> None:
     #print(total, size)
     usb = config.GetEndpoint("USB")
     if usb.IsValid():
-        def progress(file: Path, i: int , totalFiles: int) -> None:
+        def progress(file: 'Path', i: int , totalFiles: int) -> None:
             print("progress", i, totalFiles)
         def end() -> None:
             print("End!!")
-        result = usb.Full(progress, end)
+        result = usb.FullBackupOperation(progress, end)
         for error in result.IterErrors():
             print(error, error[2])
     # print(str(config.GetEndpoints()[0]))

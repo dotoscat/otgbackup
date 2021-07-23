@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
 from pathlib import Path
 from enum import Enum, auto
 from shutil import copy2
+from hashlib import blake2b
 from sys import exc_info
 from typing import Generator, Callable, Optional, Type, TYPE_CHECKING
 
@@ -59,6 +61,8 @@ class Result:
     def DestinationNoExists(self) -> bool:
         return self._kind == _Kind.DESTINATION_NO_EXISTS
 
+DATETIME_FORMAT = "%Y-%m-%dT%H-%M-%S"
+
 class Endpoint:
     """
         Endpoint operates over an endpoint defined in the config.
@@ -102,11 +106,13 @@ class Endpoint:
     def FullBackupOperation(self,
         progress: Callable[['pathlib.Path', int, int], None],
         end: Optional[Callable[[], None]] = None) -> Result:
-            """
-            """
+        """
+        """
         if not self.IsValid():
             return Result(_Kind.NO_VALID)
-        path = Path(self._path).joinpath("full")
+        today = datetime.today()
+        path = Path(self._path).joinpath(
+            "full_{0}".format(today.strftime(DATETIME_FORMAT)))
         if not path.exists():
             print("destination path does not exist")
             try:
@@ -120,8 +126,6 @@ class Endpoint:
         totalFiles, totalSize = self._config.GetTotalFilesAndSize()
         i = 0
         for aFile in self._config.IterFiles():
-            # Copy
-            # Check integrity of both files
             i += 1
             print(path, aFile)
             if drive:
@@ -135,6 +139,11 @@ class Endpoint:
                     destinationParent.mkdir(parents=True, exist_ok=True)
                 print(path, ", copy from: ", aFile, " ;to: ", destination)
                 copy2(aFile, destination)
+                if not _sameIntegrity(aFile, destination):
+                    result.AddError(
+                        aFile.as_posix(),
+                        Exception,
+                        Exception("{0} integrity failed".format(aFile.as_posix())))
             except:
                 result.AddError(aFile.as_posix(), *(exc_info()[:2]))
             finally:
@@ -144,3 +153,18 @@ class Endpoint:
             end()
         return result
 
+def _sameIntegrity(src: Path, dst: Path) -> bool:
+    """
+      Helper function to check file integrity
+    """
+    srcBytes = src.read_bytes()
+    dstBytes = dst.read_bytes()
+    srcBlake = blake2b()
+    dstBlake = blake2b()
+    srcBlake.update(srcBytes)
+    dstBlake.update(dstBytes)
+    srcHexdigest = srcBlake.hexdigest()
+    dstHexdigest = dstBlake.hexdigest()
+    print(srcHexdigest)
+    print(dstHexdigest)
+    return srcHexdigest == dstHexdigest
